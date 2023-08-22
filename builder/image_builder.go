@@ -11,32 +11,19 @@ import (
 	"strings"
 )
 
+var maxFileSize = 20
+
 func DockerImageBuilder(values Values, err error, directoryPath string) error {
 	if values.DockerfilePath == "." {
 		values.DockerfilePath = "./Dockerfile"
 	}
 
-	//cmdBuild := exec.Command("docker", "build", "-t", values.ImageName+":"+values.ImageTag, "-f", values.DockerfilePath, ".")
-	//
-	//cmdBuild.Stdout = os.Stdout
-	//cmdBuild.Stderr = os.Stderr
-	//err = cmdBuild.Run()
-	//if err != nil {
-	//	log.Fatalf("Docker build command failed: %s", err)
-	//}
-
 	filePath := directoryPath + "/" + values.ImageName + ".tar.gz"
-	//cmdSave := exec.Command("sh", "-c", "docker save "+values.ImageName+":"+values.ImageTag+" | gzip > "+filePath)
-	//cmdSave.Stdout = os.Stdout
-	//cmdSave.Stderr = os.Stderr
-	//err = cmdSave.Run()
-	//if err != nil {
-	//	log.Fatalf("Docker save command failed: %s", err)
-	//}
 
-	maxSize := 75
-	if !isAGoodFileSize(filePath, int64(maxSize)) {
-		err = splitFile(values, strconv.Itoa(maxSize)+"M", err, directoryPath, filePath)
+	err = dockerRun(values, err, filePath)
+
+	if !isAGoodFileSize(filePath, int64(maxFileSize)) {
+		err = splitFile(values, strconv.Itoa(maxFileSize)+"M", err, directoryPath, filePath)
 	} else {
 		config := service.FileUploadConfig{
 			FilePath: filePath,
@@ -53,6 +40,28 @@ func DockerImageBuilder(values Values, err error, directoryPath string) error {
 	return err
 }
 
+func dockerRun(values Values, err error, filePath string) error {
+	log.Printf("Building doker image %s", values.ImageName+":"+values.ImageTag)
+
+	cmdBuild := exec.Command("docker", "build", "-t", values.ImageName+":"+values.ImageTag, "-f", values.DockerfilePath, ".")
+
+	cmdBuild.Stdout = os.Stdout
+	cmdBuild.Stderr = os.Stderr
+	err = cmdBuild.Run()
+	if err != nil {
+		log.Fatalf("Docker build command failed: %s", err)
+	}
+
+	cmdSave := exec.Command("sh", "-c", "docker save "+values.ImageName+":"+values.ImageTag+" | gzip > "+filePath)
+	cmdSave.Stdout = os.Stdout
+	cmdSave.Stderr = os.Stderr
+	err = cmdSave.Run()
+	if err != nil {
+		log.Fatalf("Docker save command failed: %s", err)
+	}
+	return err
+}
+
 func isAGoodFileSize(filePath string, goodSize int64) bool {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
@@ -64,7 +73,10 @@ func isAGoodFileSize(filePath string, goodSize int64) bool {
 }
 
 func splitFile(values Values, maxSize string, err error, directoryPath string, filePath string) error {
-	cmdSplit := exec.Command("split", "-b", maxSize, filePath, directoryPath+"/"+values.ImageName+".part-")
+	err = os.MkdirAll(directoryPath+"/parts", os.ModePerm)
+
+	cmdSplit := exec.Command("split", "-b", maxSize, filePath, directoryPath+"/parts/"+values.ImageName+".part-")
+
 	cmdSplit.Stdout = os.Stdout
 	cmdSplit.Stderr = os.Stderr
 	err = cmdSplit.Run()
@@ -72,7 +84,7 @@ func splitFile(values Values, maxSize string, err error, directoryPath string, f
 		log.Fatalf("Failed to split file: %s", err)
 	}
 
-	uploadFilePart(values, directoryPath)
+	uploadFilePart(values, directoryPath+"parts/")
 	return err
 }
 
@@ -84,7 +96,7 @@ func uploadFilePart(values Values, directoryPath string) {
 		if !info.IsDir() {
 			filePath := directoryPath + filepath.Base(path)
 
-			if isAGoodFileSize(filePath, 76) {
+			if isAGoodFileSize(filePath, int64(maxFileSize+1)) {
 				fileName := strings.Split(filepath.Base(path), ".part-")[0]
 
 				config := service.FileUploadConfig{

@@ -12,7 +12,7 @@ bind:
     - "/var/www:/var/www"
     - "/var/log:/var/log"
 limit:
-  memory: 1024g
+  memory: 1024M
   cpu: 0.5
 volumes:
   - example_logs:

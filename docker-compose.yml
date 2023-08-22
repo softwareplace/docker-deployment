@@ -1,0 +1,14 @@
+version: "3.7"
+
+services:
+  docker-deployment:
+    container_name: docker-deployment
+    image: docker-deployment
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 256M

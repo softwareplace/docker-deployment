@@ -75,6 +75,9 @@ func PostFile(config FileUploadConfig) error {
 	}
 
 	// Create a new POST request
+
+	log.Printf("Uploading %s...\n", config.FilePath)
+
 	req, err := http.NewRequest("POST", config.UploadURL, body)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
@@ -95,6 +98,6 @@ func PostFile(config FileUploadConfig) error {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	fmt.Printf("Upload response: %s\n", body.String())
+	log.Printf("%s uploaded succesfully\n", config.FilePath)
 	return nil
 }

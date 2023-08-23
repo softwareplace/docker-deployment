@@ -8,10 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
-	"strings"
 )
 
-var maxFileSize = 20
+var maxFileSize = 10
 
 func DockerImageBuilder(values Values, err error, directoryPath string) error {
 	if values.DockerfilePath == "." {
@@ -97,13 +96,11 @@ func uploadFilePart(values Values, directoryPath string) {
 			filePath := directoryPath + filepath.Base(path)
 
 			if isAGoodFileSize(filePath, int64(maxFileSize+1)) {
-				fileName := strings.Split(filepath.Base(path), ".part-")[0]
-
 				config := service.FileUploadConfig{
 					FilePath: filePath,
 					FieldValues: []service.Field{
-						{"fileName", fileName},
-						{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},
+						{"fileName", values.ImageName},
+						{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag + "/parts"},
 					},
 					UploadURL:     values.UploadUrl,
 					Authorization: values.Authorization,

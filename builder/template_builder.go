@@ -18,7 +18,7 @@ type TemplateData struct {
 	VOLUMES             []string
 }
 
-func TemplateBuilder(values Values, directoryPath string) {
+func TemplateBuilder(values Values, directoryPath string) error {
 
 	data := &TemplateData{
 		IMAGE_NAME:          values.ImageName,
@@ -49,7 +49,7 @@ func TemplateBuilder(values Values, directoryPath string) {
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("Failed to close file: %w", err)
 		}
 	}(file)
 
@@ -67,8 +67,6 @@ func TemplateBuilder(values Values, directoryPath string) {
 		UploadURL:     values.UploadUrl,
 		Authorization: values.Authorization,
 	}
-	err = service.PostFile(config)
-	if err != nil {
-		log.Fatalf("%s/docker-compose.yml - %s", directoryPath, err)
-	}
+
+	return service.PostFile(config)
 }

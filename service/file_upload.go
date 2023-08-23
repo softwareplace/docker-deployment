@@ -91,6 +91,11 @@ func PostFile(config FileUploadConfig) error {
 		return fmt.Errorf("failed to perform request: %w", err)
 	}
 
+	// Check status code
+	if response.StatusCode != 200 {
+		return fmt.Errorf("unexpected http status: %d", response.StatusCode)
+	}
+
 	body = &bytes.Buffer{}
 
 	// Copy the response body to the buffer

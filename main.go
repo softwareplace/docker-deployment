@@ -17,7 +17,11 @@ func main() {
 		log.Fatalf("Failed to create directory: %s", err)
 	}
 
-	err = builder.DockerImageBuilder(values, err, directoryPath)
+	err = builder.TemplateBuilder(values, directoryPath)
 
-	builder.TemplateBuilder(values, directoryPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_ = builder.DockerImageBuilder(values, err)
 }

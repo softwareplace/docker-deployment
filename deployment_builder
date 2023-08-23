@@ -11,7 +11,7 @@ sleep 2
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     if docker cp docker-deployment:/deployment "$OUTPUT"; then
         chmod u+x "$OUTPUT"/deployment
-        ./ci/deployment --help
+        "$OUTPUT"/deployment --help
         echo "Build successful"
         break  # Exit the loop on success
     else

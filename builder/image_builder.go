@@ -11,23 +11,21 @@ import (
 
 var maxFileSize = 10
 
-func DockerImageBuilder(values Values, err error, directoryPath string) error {
+func DockerImageBuilder(values Values, err error) error {
 	if values.DockerfilePath == "." {
 		values.DockerfilePath = "./Dockerfile"
 	}
 
-	filePath := directoryPath + "/" + values.ImageName + ".tar.gz"
-
 	err = dockerRun(values, err)
 
 	if values.PushImage {
-		err = dockerImageStorage(values, err, directoryPath, filePath)
+		err = dockerImageStorage(values)
 	}
 
 	return err
 }
 
-func rumCommand(name string, arg ...string) {
+func rumCommand(name string, arg ...string) error {
 	cmdSave := exec.Command(name, arg...)
 	cmdSave.Stdout = os.Stdout
 	cmdSave.Stderr = os.Stderr
@@ -35,37 +33,21 @@ func rumCommand(name string, arg ...string) {
 	if err != nil {
 		log.Fatalf("Running command %s failed: %s", name, err)
 	}
+	return err
 }
 
-func dockerImageStorage(values Values, err error, directoryPath string, filePath string) error {
+func dockerImageStorage(values Values) error {
 	image := values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
 
 	log.Printf("Pushing image: %s\n", image)
-	rumCommand("docker", "image", "tag", values.ImageName+":"+values.ImageTag, image)
-	rumCommand("docker", "push", image)
-
-	//cmdSave := exec.Command("sh", "-c", "docker save "+values.ImageName+":"+values.ImageTag+" | gzip > "+filePath)
-	//cmdSave.Stdout = os.Stdout
-	//cmdSave.Stderr = os.Stderr
-	//err = cmdSave.Run()
-	//if err != nil {
-	//	log.Fatalf("Docker save command failed: %s", err)
-	//}
-	//
-	//if !isAGoodFileSize(filePath, int64(maxFileSize)) {
-	//	err = splitFile(values, strconv.Itoa(maxFileSize)+"M", err, directoryPath, filePath)
-	//} else {
-	//	config := service.FileUploadConfig{
-	//		FilePath: filePath,
-	//		FieldValues: []service.Field{
-	//			{"fileName", values.ImageName + ".tar"},
-	//			{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},
-	//		},
-	//		UploadURL:     values.UploadUrl,
-	//		Authorization: values.Authorization,
-	//	}
-	//	err = PostFile(err, config, filePath)
-	//}
+	err := rumCommand("docker", "image", "tag", values.ImageName+":"+values.ImageTag, image)
+	if err != nil {
+		return err
+	}
+	err = rumCommand("docker", "push", image)
+	if err != nil {
+		return err
+	}
 	return err
 }
 

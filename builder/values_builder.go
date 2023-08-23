@@ -37,7 +37,8 @@ func ValuesBuilder() Values {
 	var config Values
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	authorization := flag.String("authorization", "-", "Storage api authorization token")
-	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not.")
+	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
+	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 
 	flag.Parse()
 
@@ -64,6 +65,10 @@ func ValuesBuilder() Values {
 		}
 
 		config.PushImage = *pushImage
+
+		if *imageTag != "" {
+			config.ImageTag = *imageTag
+		}
 
 		if config.ImageTag == "" {
 			config.ImageTag = "latest"

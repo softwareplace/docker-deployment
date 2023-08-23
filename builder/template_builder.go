@@ -14,6 +14,7 @@ type TemplateData struct {
 	BIND_VOLUMES        []string
 	MEMORY_LIMIT        string
 	CPU_LIMIT           string
+	CONTAINER_NAME      string
 	VOLUMES             []string
 }
 
@@ -27,6 +28,11 @@ func TemplateBuilder(values Values, directoryPath string) {
 		MEMORY_LIMIT:        values.Limit.Memory,
 		CPU_LIMIT:           values.Limit.Cpu,
 		VOLUMES:             values.Volumes,
+		CONTAINER_NAME:      values.ContainerName,
+	}
+
+	if values.PullImageHost != "" {
+		data.IMAGE_NAME = values.PullImageHost + "/" + data.IMAGE_NAME
 	}
 
 	tmpl, err := template.ParseFiles(values.TemplatePath)

@@ -19,6 +19,7 @@ type Limit struct {
 
 type Values struct {
 	ImageName      string   `yaml:"imageName"`
+	ContainerName  string   `yaml:"containerName"`
 	ImageTag       string   `yaml:"imageTag"`
 	TemplatePath   string   `yaml:"template"`
 	DockerfilePath string   `yaml:"dockerfile"`
@@ -27,12 +28,16 @@ type Values struct {
 	Volumes        []string `yaml:"volumes"`
 	Authorization  string   `yaml:"authorization"`
 	UploadUrl      string   `yaml:"uploadUrl"`
+	PushImage      bool     `yaml:"pushImage"`
+	PushImageHost  string   `yaml:"pushImageHost"`
+	PullImageHost  string   `yaml:"pullImageHost"`
 }
 
 func ValuesBuilder() Values {
 	var config Values
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	authorization := flag.String("authorization", "-", "Storage api authorization token")
+	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not.")
 
 	flag.Parse()
 
@@ -57,6 +62,8 @@ func ValuesBuilder() Values {
 		if config.TemplatePath == "" {
 			config.TemplatePath = "./ci/deployment.mustache"
 		}
+
+		config.PushImage = *pushImage
 
 		if config.ImageTag == "" {
 			config.ImageTag = "latest"

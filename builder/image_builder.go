@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 )
 
 var maxFileSize = 10
@@ -19,27 +18,58 @@ func DockerImageBuilder(values Values, err error, directoryPath string) error {
 
 	filePath := directoryPath + "/" + values.ImageName + ".tar.gz"
 
-	err = dockerRun(values, err, filePath)
+	err = dockerRun(values, err)
 
-	if !isAGoodFileSize(filePath, int64(maxFileSize)) {
-		err = splitFile(values, strconv.Itoa(maxFileSize)+"M", err, directoryPath, filePath)
-	} else {
-		config := service.FileUploadConfig{
-			FilePath: filePath,
-			FieldValues: []service.Field{
-				{"fileName", values.ImageName + ".tar"},
-				{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},
-			},
-			UploadURL:     values.UploadUrl,
-			Authorization: values.Authorization,
-		}
-		err = PostFile(err, config, filePath)
+	if values.PushImage {
+		err = dockerImageStorage(values, err, directoryPath, filePath)
 	}
 
 	return err
 }
 
-func dockerRun(values Values, err error, filePath string) error {
+func rumCommand(name string, arg ...string) {
+	cmdSave := exec.Command(name, arg...)
+	cmdSave.Stdout = os.Stdout
+	cmdSave.Stderr = os.Stderr
+	err := cmdSave.Run()
+	if err != nil {
+		log.Fatalf("Running command %s failed: %s", name, err)
+	}
+}
+
+func dockerImageStorage(values Values, err error, directoryPath string, filePath string) error {
+	image := values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
+
+	log.Printf("Pushing image: %s\n", image)
+	rumCommand("docker", "image", "tag", values.ImageName+":"+values.ImageTag, image)
+	rumCommand("docker", "push", image)
+
+	//cmdSave := exec.Command("sh", "-c", "docker save "+values.ImageName+":"+values.ImageTag+" | gzip > "+filePath)
+	//cmdSave.Stdout = os.Stdout
+	//cmdSave.Stderr = os.Stderr
+	//err = cmdSave.Run()
+	//if err != nil {
+	//	log.Fatalf("Docker save command failed: %s", err)
+	//}
+	//
+	//if !isAGoodFileSize(filePath, int64(maxFileSize)) {
+	//	err = splitFile(values, strconv.Itoa(maxFileSize)+"M", err, directoryPath, filePath)
+	//} else {
+	//	config := service.FileUploadConfig{
+	//		FilePath: filePath,
+	//		FieldValues: []service.Field{
+	//			{"fileName", values.ImageName + ".tar"},
+	//			{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},
+	//		},
+	//		UploadURL:     values.UploadUrl,
+	//		Authorization: values.Authorization,
+	//	}
+	//	err = PostFile(err, config, filePath)
+	//}
+	return err
+}
+
+func dockerRun(values Values, err error) error {
 	log.Printf("Building doker image %s", values.ImageName+":"+values.ImageTag)
 
 	cmdBuild := exec.Command("docker", "build", "-t", values.ImageName+":"+values.ImageTag, "-f", values.DockerfilePath, ".")
@@ -51,13 +81,6 @@ func dockerRun(values Values, err error, filePath string) error {
 		log.Fatalf("Docker build command failed: %s", err)
 	}
 
-	cmdSave := exec.Command("sh", "-c", "docker save "+values.ImageName+":"+values.ImageTag+" | gzip > "+filePath)
-	cmdSave.Stdout = os.Stdout
-	cmdSave.Stderr = os.Stderr
-	err = cmdSave.Run()
-	if err != nil {
-		log.Fatalf("Docker save command failed: %s", err)
-	}
 	return err
 }
 

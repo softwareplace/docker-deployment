@@ -30,7 +30,7 @@ target/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
+deployment_builder/
 !**/src/main/**/build/
 !**/src/test/**/build/
 

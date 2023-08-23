@@ -1,2 +1,4 @@
+output ?= ./ci
+
 docker-build:
-	sh ./build $(output)
+	sh ./deployment_builder $(output)

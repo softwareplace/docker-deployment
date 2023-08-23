@@ -34,7 +34,7 @@ func TemplateBuilder(values Values, directoryPath string) {
 		log.Fatalf("Failed to load template file %s - %s", values.TemplatePath, err)
 	}
 
-	file, err := os.Create(directoryPath + "/docker-compose.yml")
+	file, err := os.Create(directoryPath + "docker-compose.yml")
 
 	if err != nil {
 		log.Fatal(err)
@@ -53,7 +53,7 @@ func TemplateBuilder(values Values, directoryPath string) {
 	}
 
 	config := service.FileUploadConfig{
-		FilePath: directoryPath + "/docker-compose.yml",
+		FilePath: directoryPath + "docker-compose.yml",
 		FieldValues: []service.Field{
 			{"fileName", "docker-compose"},
 			{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},

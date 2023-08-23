@@ -31,8 +31,8 @@ type Values struct {
 
 func ValuesBuilder() Values {
 	var config Values
-	configPath := flag.String("config", "", "Path to the deployment.yaml file.")
-	authorization := flag.String("authorization", "", "Api push docker config authorization token.")
+	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
+	authorization := flag.String("authorization", "-", "Storage api authorization token")
 
 	flag.Parse()
 
@@ -55,7 +55,7 @@ func ValuesBuilder() Values {
 		}
 		// Set defaults
 		if config.TemplatePath == "" {
-			config.TemplatePath = "./docker-compose-template.yml"
+			config.TemplatePath = "./ci/deployment.mustache"
 		}
 
 		if config.ImageTag == "" {

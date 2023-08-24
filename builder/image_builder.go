@@ -3,6 +3,7 @@ package builder
 import (
 	"docker-deployment/service"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -18,10 +19,16 @@ func DockerImageBuilder(values Values, err error) error {
 
 	err = dockerRun(values, err)
 
-	if values.PushImage {
+	log.Println("Push image", values.PushImage)
+	if values.PushImage == true {
 		err = dockerImageStorage(values)
 	}
 
+	err = WriteStringToFile("deploy-refs", values.ImageName+" "+values.ImageName+"/"+values.ImageTag)
+
+	if err != nil {
+		return err
+	}
 	return err
 }
 
@@ -34,6 +41,15 @@ func rumCommand(name string, arg ...string) error {
 		log.Fatalf("Running command %s failed: %s", name, err)
 	}
 	return err
+}
+
+func WriteStringToFile(filename string, data string) error {
+	err := ioutil.WriteFile(filename, []byte(data), 0644)
+	if err != nil {
+		log.Fatalf("Failed to write to file %s: %v", filename, err)
+		return err
+	}
+	return nil
 }
 
 func dockerImageStorage(values Values) error {

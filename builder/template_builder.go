@@ -1,7 +1,9 @@
 package builder
 
 import (
-	"docker-deployment/service"
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"text/template"
@@ -58,15 +60,26 @@ func TemplateBuilder(values Values, directoryPath string) error {
 		log.Fatal(err)
 	}
 
-	config := service.FileUploadConfig{
-		FilePath: directoryPath + "docker-compose.yml",
-		FieldValues: []service.Field{
-			{"fileName", "docker-compose"},
-			{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag},
-		},
-		UploadURL:     values.UploadUrl,
-		Authorization: values.Authorization,
-	}
+	deployContent, err := LoadFileContentToBase64(directoryPath + "docker-compose.yml")
 
-	return service.PostFile(config)
+	deployRef := fmt.Sprintf("-appName %s -imageTag %s -expectedOutput %s -deployment %s", values.ContainerName, values.ImageTag, values.ExpectedOutput, deployContent)
+
+	return WriteStringToFile("deploy-refs", deployRef)
+}
+
+func LoadFileContentToBase64(filePath string) (string, error) {
+	fileContent, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(fileContent), nil
+}
+
+func WriteStringToFile(filename string, data string) error {
+	err := ioutil.WriteFile(filename, []byte(data), 0644)
+	if err != nil {
+		log.Fatalf("Failed to write to file %s: %v", filename, err)
+		return err
+	}
+	return nil
 }

@@ -31,6 +31,7 @@ type Values struct {
 	PushImage      bool     `yaml:"pushImage"`
 	PushImageHost  string   `yaml:"pushImageHost"`
 	PullImageHost  string   `yaml:"pullImageHost"`
+	ExpectedOutput string   `yaml:"expectedOutput"`
 }
 
 func ValuesBuilder() Values {

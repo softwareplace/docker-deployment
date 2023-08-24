@@ -4,6 +4,7 @@ containerName: storage-api
 temple: "/opt/deployment/deployment.mustache"
 uploadUrl: https://docker-registry.com/upload
 dockerRegistryDomain: docker-registry.com
+expectedOutput: "Jetty started on port(s) 80"
 dockerfile: .
 bind:
   ports:

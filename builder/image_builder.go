@@ -1,16 +1,10 @@
 package builder
 
 import (
-	"docker-deployment/service"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 )
-
-var maxFileSize = 10
 
 func DockerImageBuilder(values Values, err error) error {
 	if values.DockerfilePath == "." {
@@ -23,8 +17,6 @@ func DockerImageBuilder(values Values, err error) error {
 	if values.PushImage == true {
 		err = dockerImageStorage(values)
 	}
-
-	err = WriteStringToFile("deploy-refs", values.ImageName+" "+values.ImageName+"/"+values.ImageTag)
 
 	if err != nil {
 		return err
@@ -41,15 +33,6 @@ func rumCommand(name string, arg ...string) error {
 		log.Fatalf("Running command %s failed: %s", name, err)
 	}
 	return err
-}
-
-func WriteStringToFile(filename string, data string) error {
-	err := ioutil.WriteFile(filename, []byte(data), 0644)
-	if err != nil {
-		log.Fatalf("Failed to write to file %s: %v", filename, err)
-		return err
-	}
-	return nil
 }
 
 func dockerImageStorage(values Values) error {
@@ -79,70 +62,5 @@ func dockerRun(values Values, err error) error {
 		log.Fatalf("Docker build command failed: %s", err)
 	}
 
-	return err
-}
-
-func isAGoodFileSize(filePath string, goodSize int64) bool {
-	fileInfo, err := os.Stat(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	fileSizeInBytes := fileInfo.Size()
-	fileSizeInMB := fileSizeInBytes / (1024 * 1024)
-	return fileSizeInMB < goodSize
-}
-
-func splitFile(values Values, maxSize string, err error, directoryPath string, filePath string) error {
-	err = os.MkdirAll(directoryPath+"/parts", os.ModePerm)
-
-	cmdSplit := exec.Command("split", "-b", maxSize, filePath, directoryPath+"/parts/"+values.ImageName+".part-")
-
-	cmdSplit.Stdout = os.Stdout
-	cmdSplit.Stderr = os.Stderr
-	err = cmdSplit.Run()
-	if err != nil {
-		log.Fatalf("Failed to split file: %s", err)
-	}
-
-	uploadFilePart(values, directoryPath+"parts/")
-	return err
-}
-
-func uploadFilePart(values Values, directoryPath string) {
-	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			filePath := directoryPath + filepath.Base(path)
-
-			if isAGoodFileSize(filePath, int64(maxFileSize+1)) {
-				config := service.FileUploadConfig{
-					FilePath: filePath,
-					FieldValues: []service.Field{
-						{"fileName", values.ImageName},
-						{"dirName", "deployment/" + values.ImageName + "/" + values.ImageTag + "/parts"},
-					},
-					UploadURL:     values.UploadUrl,
-					Authorization: values.Authorization,
-				}
-				err = PostFile(err, config, filePath)
-			} else {
-				log.Printf("File %s too large, than will be ignored", filePath)
-			}
-		}
-		return nil
-	})
-
-	if err != nil {
-		fmt.Printf("error walking the path %v: %v\n", directoryPath, err)
-	}
-}
-
-func PostFile(err error, config service.FileUploadConfig, filePath string) error {
-	err = service.PostFile(config)
-	if err != nil {
-		log.Fatalf("Post docker image failed %s - %s", filePath, err)
-	}
 	return err
 }

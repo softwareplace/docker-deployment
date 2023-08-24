@@ -26,7 +26,6 @@ type Values struct {
 	Bind           Bind     `yaml:"bind"`
 	Limit          Limit    `yaml:"limit"`
 	Volumes        []string `yaml:"volumes"`
-	Authorization  string   `yaml:"authorization"`
 	UploadUrl      string   `yaml:"uploadUrl"`
 	PushImage      bool     `yaml:"pushImage"`
 	PushImageHost  string   `yaml:"pushImageHost"`
@@ -37,13 +36,12 @@ type Values struct {
 func ValuesBuilder() Values {
 	var config Values
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
-	authorization := flag.String("authorization", "-", "Storage api authorization token")
 	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 
 	flag.Parse()
 
-	if *configPath != "" && *authorization != "" {
+	if *configPath != "" {
 		file, err := ioutil.ReadFile(*configPath)
 
 		if err != nil {
@@ -84,7 +82,6 @@ func ValuesBuilder() Values {
 			config.Limit.Cpu = "0.5"
 		}
 
-		config.Authorization = *authorization
 	} else {
 		log.Fatalf("Path to the deployment.yaml file and authorization  must be provided.")
 	}

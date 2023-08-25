@@ -5,6 +5,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 type Bind struct {
@@ -31,15 +32,24 @@ type Values struct {
 	PushImageHost  string   `yaml:"pushImageHost"`
 	PullImageHost  string   `yaml:"pullImageHost"`
 	ExpectedOutput string   `yaml:"expectedOutput"`
+	LoginUsername  string   `yaml:"loginUsername"`
+	LoginPassword  string   `yaml:"loginPassword"`
 }
 
 func ValuesBuilder() Values {
 	var config Values
+	loginUsername := flag.String("loginUsername", "", "Docker login username. (Required)")
+	loginPassword := flag.String("loginPassword", "", "Docker login password. (Required)")
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 
 	flag.Parse()
+
+	if *loginUsername == "" || *loginPassword == "" {
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
 
 	if *configPath != "" {
 		file, err := ioutil.ReadFile(*configPath)
@@ -64,6 +74,8 @@ func ValuesBuilder() Values {
 		}
 
 		config.PushImage = *pushImage
+		config.LoginPassword = *loginPassword
+		config.LoginUsername = *loginUsername
 
 		if *imageTag != "" {
 			config.ImageTag = *imageTag

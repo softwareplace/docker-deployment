@@ -5,12 +5,14 @@
 
 ## Args
 
-| Arg         | Required | Default            | Description                                                                                                                     |
-|-------------|----------|--------------------|---------------------------------------------------------------------------------------------------------------------------------|
-| --help      | false    |                    | Show available args.                                                                                                            |
-| --config    | false    | cd/deployment.yaml | Path to the deployment.yaml file.                                                                                               |
-| --pushImage | false    | true               | A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed. |
-| --imageTag  | false    |                    | The imageTag parameter is used during the Docker image build process to tag the image that is being built.                      |
+| Arg            | Required | Default            | Description                                                                                                                     |
+|----------------|----------|--------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| -loginUsername | true     |                    | Docker login username.                                                                                                          |
+| -loginPassword | true     |                    | Docker login password.                                                                                                          |
+| -help          | false    |                    | Show available args.                                                                                                            |
+| -config        | false    | cd/deployment.yaml | Path to the deployment.yaml file.                                                                                               |
+| -pushImage     | false    | true               | A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed. |
+| -imageTag      | false    |                    | The imageTag parameter is used during the Docker image build process to tag the image that is being built.                      |
 
 - Config build
 
@@ -22,8 +24,8 @@ imageTag: v1
 template: "ci/deployment.mustache"
 # If you want to push the image to a custom docker registry
 pushImageHost: docker-registry.com
-# If you want to pull the image from a custom docker registry
-pullImageHost: 127.0.0.1:5000
+# If you want to pull the image from a docker registry
+pullImageHost: localhost:5000
 # Represents a log that container application display when successful started
 expectedOutput: "App started"
 dockerfile: .

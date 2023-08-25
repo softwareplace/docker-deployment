@@ -43,7 +43,15 @@ func dockerImageStorage(values Values) error {
 	if err != nil {
 		return err
 	}
+	err = rumCommand("docker", "login", "-p", values.LoginPassword, "-u", values.LoginUsername, values.PushImageHost)
+	if err != nil {
+		return err
+	}
 	err = rumCommand("docker", "push", image)
+	if err != nil {
+		return err
+	}
+	err = rumCommand("docker", "logout", values.PushImageHost)
 	if err != nil {
 		return err
 	}

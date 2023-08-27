@@ -12,16 +12,16 @@ func DockerImageBuilder(values Values, err error) error {
 	}
 
 	err = dockerRun(values, err)
-
-	log.Println("Push image", values.PushImage)
-	if values.PushImage == true {
-		err = dockerImageStorage(values)
-	}
-
 	if err != nil {
 		return err
 	}
-	return err
+
+	if values.PushImage == true {
+		log.Println("Push image", values.PushImage)
+		return dockerImageStorage(values)
+	}
+
+	return nil
 }
 
 func rumCommand(name string, arg ...string) error {
@@ -36,26 +36,42 @@ func rumCommand(name string, arg ...string) error {
 }
 
 func dockerImageStorage(values Values) error {
-	image := values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
+	image := values.ImageName + ":" + values.ImageTag
+
+	if values.PullImageHost != "" {
+		image = values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
+	}
 
 	log.Printf("Pushing image: %s\n", image)
 	err := rumCommand("docker", "image", "tag", values.ImageName+":"+values.ImageTag, image)
 	if err != nil {
 		return err
 	}
-	err = rumCommand("docker", "login", "-p", values.LoginPassword, "-u", values.LoginUsername, values.PushImageHost)
-	if err != nil {
-		return err
+
+	if showDoLogin(values.LoginUsername, values.LoginPassword) {
+		err = rumCommand("docker", "login", "-p", values.LoginPassword, "-u", values.LoginUsername, values.PushImageHost)
+		if err != nil {
+			return err
+		}
 	}
+
 	err = rumCommand("docker", "push", image)
 	if err != nil {
 		return err
 	}
-	err = rumCommand("docker", "logout", values.PushImageHost)
-	if err != nil {
-		return err
+
+	if showDoLogin(values.LoginUsername, values.LoginPassword) {
+		err = rumCommand("docker", "logout", values.PushImageHost)
+		if err != nil {
+			return err
+		}
 	}
+
 	return err
+}
+
+func showDoLogin(username string, password string) bool {
+	return username != "" && password != ""
 }
 
 func dockerRun(values Values, err error) error {

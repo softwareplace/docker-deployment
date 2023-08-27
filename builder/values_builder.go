@@ -3,7 +3,6 @@ package builder
 import (
 	"flag"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -18,41 +17,44 @@ type Limit struct {
 	Cpu    string `yaml:"cpu"`
 }
 
+type Healthcheck struct {
+	Url         string `yaml:"url"`
+	Interval    string `yaml:"interval"`
+	Timeout     string `yaml:"timeout"`
+	Retries     int    `yaml:"retries"`
+	StartPeriod string `yaml:"start_period"`
+}
+
 type Values struct {
-	ImageName      string   `yaml:"imageName"`
-	ContainerName  string   `yaml:"containerName"`
-	ImageTag       string   `yaml:"imageTag"`
-	TemplatePath   string   `yaml:"template"`
-	DockerfilePath string   `yaml:"dockerfile"`
-	Bind           Bind     `yaml:"bind"`
-	Limit          Limit    `yaml:"limit"`
-	Volumes        []string `yaml:"volumes"`
-	UploadUrl      string   `yaml:"uploadUrl"`
-	PushImage      bool     `yaml:"pushImage"`
-	PushImageHost  string   `yaml:"pushImageHost"`
-	PullImageHost  string   `yaml:"pullImageHost"`
-	ExpectedOutput string   `yaml:"expectedOutput"`
-	LoginUsername  string   `yaml:"loginUsername"`
-	LoginPassword  string   `yaml:"loginPassword"`
+	ImageName      string      `yaml:"imageName"`
+	ContainerName  string      `yaml:"containerName"`
+	ImageTag       string      `yaml:"imageTag"`
+	TemplatePath   string      `yaml:"template"`
+	DockerfilePath string      `yaml:"dockerfile"`
+	Bind           Bind        `yaml:"bind"`
+	Limit          Limit       `yaml:"limit"`
+	Volumes        []string    `yaml:"volumes"`
+	UploadUrl      string      `yaml:"uploadUrl"`
+	PushImage      bool        `yaml:"pushImage"`
+	PushImageHost  string      `yaml:"pushImageHost"`
+	PullImageHost  string      `yaml:"pullImageHost"`
+	LoginUsername  string      `yaml:"loginUsername"`
+	LoginPassword  string      `yaml:"loginPassword"`
+	HealthCheck    Healthcheck `yaml:"healthcheck"`
 }
 
 func ValuesBuilder() Values {
 	var config Values
-	loginUsername := flag.String("loginUsername", "", "Docker login username. (Required)")
-	loginPassword := flag.String("loginPassword", "", "Docker login password. (Required)")
+	loginUsername := flag.String("loginUsername", "", "Docker login username, if provided username and password, will try to login on Docker.")
+	loginPassword := flag.String("loginPassword", "", "Docker login password, if provided username and password, will try to login on Docker.")
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 
 	flag.Parse()
 
-	if *loginUsername == "" || *loginPassword == "" {
-		flag.PrintDefaults()
-		os.Exit(2)
-	}
-
 	if *configPath != "" {
-		file, err := ioutil.ReadFile(*configPath)
+		file, err := os.ReadFile(*configPath)
 
 		if err != nil {
 			log.Fatalf("Error reading YAML file: %s\n", err)

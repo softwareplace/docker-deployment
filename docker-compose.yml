@@ -8,7 +8,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./build/:/build/
+      - ./ci/:/build/
     deploy:
       resources:
         limits:

@@ -73,7 +73,7 @@ func TemplateBuilder(values Values, directoryPath string) error {
 
 	deployContent, err := LoadFileContentToBase64(directoryPath + "docker-compose.yml")
 
-	deployRef := fmt.Sprintf("-appName \"%s\" -ImageTag \"%s\" -deployment \"%s\"",
+	deployRef := fmt.Sprintf("-appName \"%s\" -imageTag \"%s\" -deployment \"%s\"",
 		values.ContainerName, values.ImageTag, deployContent)
 
 	return WriteStringToFile("deploy-refs", deployRef)

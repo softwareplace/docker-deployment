@@ -1,0 +1,22 @@
+imageName: fisio-care-dev-api
+imageTag: v1
+containerName: fisio-care-dev-api
+template: "ci/deployment.mustache"
+pushImageHost: docker.neurogroup.app.br
+pullImageHost: localhost:5000
+healthcheck:
+  retries: 5
+  timeout: 15s
+  interval: 30s
+  start_period: 10s
+  url: "http://172.17.0.1:8084/api/fisio-care/v1/health"
+dockerfile: .
+bind:
+  ports:
+    - "127.0.0.1:8084:8080"
+    - "172.17.0.1:8084:8080"
+  volumes:
+    - /opt/logs/:/opt/logs
+limit:
+  memory: 1G
+  cpu: 0.5

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ -f "/build/deployment" ]; then
+  rm /build/deployment
+fi
+
+cp /app/deployment /build/deployment
+
+if [ -f "/build/deployment" ]; then
+    chmod u+x /app/deployment
+    /build/deployment --help
+else
+    echo "Failed to build"
+    exit 1
+fi
+echo "Build generated successful"
+
+
+

@@ -17,6 +17,12 @@ healthcheck:
   start_period: 10s
   url: "http://172.17.0.1:8080"
 dockerfile: .
+environment:
+  MY_ENV: "MY_ENV"
+  MY_ENV_02: "MY_ENV_02"
+args:
+  PORT: "80"
+  PROFILE: "prd"
 bind:
   ports:
     - "127.0.0.1:8080:80"

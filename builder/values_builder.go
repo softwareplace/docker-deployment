@@ -26,21 +26,23 @@ type Healthcheck struct {
 }
 
 type Values struct {
-	ImageName      string      `yaml:"imageName"`
-	ContainerName  string      `yaml:"containerName"`
-	ImageTag       string      `yaml:"imageTag"`
-	TemplatePath   string      `yaml:"template"`
-	DockerfilePath string      `yaml:"dockerfile"`
-	Bind           Bind        `yaml:"bind"`
-	Limit          Limit       `yaml:"limit"`
-	Volumes        []string    `yaml:"volumes"`
-	UploadUrl      string      `yaml:"uploadUrl"`
-	PushImage      bool        `yaml:"pushImage"`
-	PushImageHost  string      `yaml:"pushImageHost"`
-	PullImageHost  string      `yaml:"pullImageHost"`
-	LoginUsername  string      `yaml:"loginUsername"`
-	LoginPassword  string      `yaml:"loginPassword"`
-	HealthCheck    Healthcheck `yaml:"healthcheck"`
+	ImageName      string            `yaml:"imageName"`
+	ContainerName  string            `yaml:"containerName"`
+	ImageTag       string            `yaml:"imageTag"`
+	TemplatePath   string            `yaml:"template"`
+	DockerfilePath string            `yaml:"dockerfile"`
+	Bind           Bind              `yaml:"bind"`
+	Limit          Limit             `yaml:"limit"`
+	Volumes        []string          `yaml:"volumes"`
+	Environment    map[string]string `yaml:"environment"`
+	Args           map[string]string `yaml:"args"`
+	UploadUrl      string            `yaml:"uploadUrl"`
+	PushImage      bool              `yaml:"pushImage"`
+	PushImageHost  string            `yaml:"pushImageHost"`
+	PullImageHost  string            `yaml:"pullImageHost"`
+	LoginUsername  string            `yaml:"loginUsername"`
+	LoginPassword  string            `yaml:"loginPassword"`
+	HealthCheck    Healthcheck       `yaml:"healthcheck"`
 }
 
 func ValuesBuilder() Values {
@@ -52,6 +54,7 @@ func ValuesBuilder() Values {
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 
 	flag.Parse()
+	log.Println("PushImage === ", *pushImage)
 
 	if *configPath != "" {
 		file, err := os.ReadFile(*configPath)

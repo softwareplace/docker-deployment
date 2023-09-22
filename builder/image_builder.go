@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -19,6 +20,8 @@ func DockerImageBuilder(values Values, err error) error {
 	if values.PushImage == true {
 		log.Println("Push image", values.PushImage)
 		return dockerImageStorage(values)
+	} else {
+		log.Println("Push image was disable.")
 	}
 
 	return nil
@@ -77,7 +80,15 @@ func showDoLogin(username string, password string) bool {
 func dockerRun(values Values, err error) error {
 	log.Printf("Building doker image %s", values.ImageName+":"+values.ImageTag)
 
-	cmdBuild := exec.Command("docker", "build", "-t", values.ImageName+":"+values.ImageTag, "-f", values.DockerfilePath, ".")
+	args := []string{"build", "-t", values.ImageName + ":" + values.ImageTag, "-f", values.DockerfilePath}
+
+	for argKey, argValue := range values.Args {
+		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", argKey, argValue))
+	}
+
+	args = append(args, ".")
+
+	cmdBuild := exec.Command("docker", args...)
 
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr

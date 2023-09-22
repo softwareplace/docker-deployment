@@ -1,3 +1,8 @@
 docker-build:
 	git submodule update --recursive --init
 	docker-compose up --build
+
+test:
+	make docker-build
+	./ci/deployment -imageTag "v5"  -config deployment.yaml -pushImage=false
+	cat ./.temp/docker-compose.yml

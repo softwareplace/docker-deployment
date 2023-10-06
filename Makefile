@@ -1,6 +1,7 @@
 docker-build:
 	git submodule update --recursive --init
-	docker-compose up --build
+	docker-compose up --build -d
+	docker-compose down
 
 test:
 	make docker-build

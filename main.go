@@ -2,8 +2,10 @@ package main
 
 import (
 	"docker-deployment/builder"
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 )
 
 func main() {
@@ -24,4 +26,13 @@ func main() {
 	}
 
 	_ = builder.DockerImageBuilder(values, err)
+
+	fmt.Println(directoryPath+"docker-compose.yml", "generated successful")
+
+	cmdBuild := exec.Command("cat", directoryPath+"docker-compose.yml")
+
+	cmdBuild.Stdout = os.Stdout
+	cmdBuild.Stderr = os.Stderr
+	err = cmdBuild.Run()
+
 }

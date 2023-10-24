@@ -78,7 +78,7 @@ func showDoLogin(username string, password string) bool {
 }
 
 func dockerRun(values Values, err error) error {
-	log.Printf("Building doker image %s", values.ImageName+":"+values.ImageTag)
+	log.Printf("Building doker image %s started", values.ImageName+":"+values.ImageTag)
 
 	args := []string{"build", "-t", values.ImageName + ":" + values.ImageTag, "-f", values.DockerfilePath}
 
@@ -91,7 +91,6 @@ func dockerRun(values Values, err error) error {
 	}
 
 	args = append(args, ".")
-	args = append(args, "--no-cache ")
 
 	cmdBuild := exec.Command("docker", args...)
 

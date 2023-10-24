@@ -86,7 +86,12 @@ func dockerRun(values Values, err error) error {
 		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", argKey, argValue))
 	}
 
+	for _, host := range values.ExtrasHosts {
+		args = append(args, "--add-host", host)
+	}
+
 	args = append(args, ".")
+	args = append(args, "--no-cache ")
 
 	cmdBuild := exec.Command("docker", args...)
 

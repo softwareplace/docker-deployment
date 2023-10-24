@@ -23,6 +23,9 @@ environment:
 args:
   PORT: "80"
   PROFILE: "prd"
+extrasHosts:
+  - "server.net:172.17.0.1"
+  - "local.server.net:172.17.0.1"
 bind:
   ports:
     - "127.0.0.1:8080:80"

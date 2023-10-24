@@ -34,6 +34,7 @@ type Values struct {
 	Bind           Bind              `yaml:"bind"`
 	Limit          Limit             `yaml:"limit"`
 	Volumes        []string          `yaml:"volumes"`
+	ExtrasHosts    []string          `yaml:"extrasHosts"`
 	Environment    map[string]string `yaml:"environment"`
 	Args           map[string]string `yaml:"args"`
 	UploadUrl      string            `yaml:"uploadUrl"`
@@ -70,8 +71,8 @@ func ValuesBuilder() Values {
 		}
 
 		// Check if mandatory values are set
-		if config.ImageName == "" || len(config.Bind.Ports) == 0 || len(config.Bind.Volumes) == 0 {
-			log.Fatalf("Error: Missing required parameters in YAML. ImageName, Ports and Volumes must be set")
+		if config.ImageName == "" {
+			log.Fatalf("Error: Missing required parameters in YAML. ImageName must be set")
 		}
 		// Set defaults
 		if config.TemplatePath == "" {

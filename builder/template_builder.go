@@ -16,6 +16,7 @@ type TemplateData struct {
 	MemoryLimit            string
 	CpuLimit               string
 	ContainerName          string
+	ExtrasHosts            []string
 	Volumes                []string
 	Environment            map[string]string
 	HealthCheckUrl         string
@@ -35,6 +36,7 @@ func TemplateBuilder(values Values, directoryPath string) error {
 		MemoryLimit:            values.Limit.Memory,
 		CpuLimit:               values.Limit.Cpu,
 		Volumes:                values.Volumes,
+		ExtrasHosts:            values.ExtrasHosts,
 		Environment:            values.Environment,
 		ContainerName:          values.ContainerName,
 		HealthCheckUrl:         values.HealthCheck.Url,

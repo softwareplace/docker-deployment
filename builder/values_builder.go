@@ -55,7 +55,7 @@ func ValuesBuilder() Values {
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
 	fileName := flag.String("fileName", "docker-image.tar", "If storeImageAsFile is true, the image will be stored as a file with the name provided in fileName.")
-	pushImage := flag.String("pushImage", "false", "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
+	pushImage := flag.String("pushImage", "true", "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	storeImageAsFile := flag.String("storeImageAsFile", "false", "If true, the image will be stored as a file.")
 
 	flag.Parse()

@@ -5,4 +5,4 @@ docker-build:
 
 test:
 	make docker-build
-	./ci/deployment -imageTag "v5"  -config deployment.yaml -pushImage=false
+	./ci/deployment -imageTag "v5"  -config deployment.yaml -pushImage=false -storeImageAsFile=true

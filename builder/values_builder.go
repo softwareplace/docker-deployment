@@ -26,24 +26,26 @@ type Healthcheck struct {
 }
 
 type Values struct {
-	ImageName      string            `yaml:"imageName"`
-	ContainerName  string            `yaml:"containerName"`
-	ImageTag       string            `yaml:"imageTag"`
-	TemplatePath   string            `yaml:"template"`
-	DockerfilePath string            `yaml:"dockerfile"`
-	Bind           Bind              `yaml:"bind"`
-	Limit          Limit             `yaml:"limit"`
-	Volumes        []string          `yaml:"volumes"`
-	ExtrasHosts    []string          `yaml:"extrasHosts"`
-	Environment    map[string]string `yaml:"environment"`
-	Args           map[string]string `yaml:"args"`
-	UploadUrl      string            `yaml:"uploadUrl"`
-	PushImage      bool              `yaml:"pushImage"`
-	PushImageHost  string            `yaml:"pushImageHost"`
-	PullImageHost  string            `yaml:"pullImageHost"`
-	LoginUsername  string            `yaml:"loginUsername"`
-	LoginPassword  string            `yaml:"loginPassword"`
-	HealthCheck    Healthcheck       `yaml:"healthcheck"`
+	ImageName        string            `yaml:"imageName"`
+	ContainerName    string            `yaml:"containerName"`
+	ImageTag         string            `yaml:"imageTag"`
+	TemplatePath     string            `yaml:"template"`
+	DockerfilePath   string            `yaml:"dockerfile"`
+	Bind             Bind              `yaml:"bind"`
+	Limit            Limit             `yaml:"limit"`
+	Volumes          []string          `yaml:"volumes"`
+	ExtrasHosts      []string          `yaml:"extrasHosts"`
+	Environment      map[string]string `yaml:"environment"`
+	Args             map[string]string `yaml:"args"`
+	UploadUrl        string            `yaml:"uploadUrl"`
+	PushImage        bool              `yaml:"pushImage"`
+	PushImageHost    string            `yaml:"pushImageHost"`
+	PullImageHost    string            `yaml:"pullImageHost"`
+	LoginUsername    string            `yaml:"loginUsername"`
+	LoginPassword    string            `yaml:"loginPassword"`
+	HealthCheck      Healthcheck       `yaml:"healthcheck"`
+	StoreImageAsFile bool
+	FileName         string
 }
 
 func ValuesBuilder() Values {
@@ -53,6 +55,8 @@ func ValuesBuilder() Values {
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
 	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
+	storeImageAsFile := flag.Bool("storeImageAsFile", false, "If true, the image will be stored as a file.")
+	fileName := flag.String("fileName", "docker-image.tar", "If storeImageAsFile is true, the image will be stored as a file with the name provided in fileName.")
 
 	flag.Parse()
 	log.Println("PushImage === ", *pushImage)
@@ -79,6 +83,8 @@ func ValuesBuilder() Values {
 			config.TemplatePath = "./ci/deployment.mustache"
 		}
 
+		config.StoreImageAsFile = *storeImageAsFile
+		config.FileName = *fileName
 		config.PushImage = *pushImage
 		config.LoginPassword = *loginPassword
 		config.LoginUsername = *loginUsername

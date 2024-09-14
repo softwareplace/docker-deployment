@@ -99,7 +99,32 @@ func dockerRun(values Values, err error) error {
 	err = cmdBuild.Run()
 	if err != nil {
 		log.Fatalf("Docker build command failed: %s", err)
+	} else {
+		if values.StoreImageAsFile {
+			err = storeDockerImageToFile(values)
+		}
 	}
 
+	return err
+}
+
+func storeDockerImageToFile(values Values) error {
+	log.Println("Storing image as file")
+	image := values.ImageName + ":" + values.ImageTag
+
+	if values.PullImageHost != "" {
+		image = values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
+	}
+
+	err := rumCommand("docker", "image", "tag", values.ImageName+":"+values.ImageTag, image)
+
+	if err != nil {
+		return err
+	}
+
+	err = rumCommand("docker", "save", "-o", values.FileName, image)
+	if err != nil {
+		return err
+	}
 	return err
 }

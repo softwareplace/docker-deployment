@@ -53,13 +53,12 @@ func ValuesBuilder() Values {
 	loginUsername := flag.String("loginUsername", "", "Docker login username, if provided username and password, will try to login on Docker.")
 	loginPassword := flag.String("loginPassword", "", "Docker login password, if provided username and password, will try to login on Docker.")
 	configPath := flag.String("config", "cd/deployment.yaml", "Path to the deployment.yaml file.")
-	pushImage := flag.Bool("pushImage", true, "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
 	imageTag := flag.String("imageTag", "", "The imageTag parameter is used during the Docker image build process to tag the image that is being built.")
-	storeImageAsFile := flag.Bool("storeImageAsFile", false, "If true, the image will be stored as a file.")
 	fileName := flag.String("fileName", "docker-image.tar", "If storeImageAsFile is true, the image will be stored as a file with the name provided in fileName.")
+	pushImage := flag.String("pushImage", "false", "A flag to indicate whether to push the image or not. If true the generate docker image and docker-compose.yaml, will be pushed.")
+	storeImageAsFile := flag.String("storeImageAsFile", "false", "If true, the image will be stored as a file.")
 
 	flag.Parse()
-	log.Println("PushImage === ", *pushImage)
 
 	if *configPath != "" {
 		file, err := os.ReadFile(*configPath)
@@ -83,9 +82,10 @@ func ValuesBuilder() Values {
 			config.TemplatePath = "./ci/deployment.mustache"
 		}
 
-		config.StoreImageAsFile = *storeImageAsFile
+		config.StoreImageAsFile = *storeImageAsFile == "true"
+		config.PushImage = *pushImage == "true"
+
 		config.FileName = *fileName
-		config.PushImage = *pushImage
 		config.LoginPassword = *loginPassword
 		config.LoginUsername = *loginUsername
 

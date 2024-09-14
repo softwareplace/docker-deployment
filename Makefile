@@ -5,4 +5,9 @@ docker-build:
 
 test:
 	make docker-build
-	./ci/deployment -imageTag "v5"  -config deployment.yaml -pushImage=false -storeImageAsFile=true -fileName="./.temp/my-docker-image.tar"
+	./ci/deployment \
+		-imageTag "v5" \
+		-config "deployment.yaml" \
+		-fileName "./.temp/my-docker-image.tar" \
+		-storeImageAsFile true \
+		-pushImage false

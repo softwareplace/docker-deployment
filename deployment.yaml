@@ -4,7 +4,7 @@ containerName: my-app
 imageTag: v1
 template: "ci/deployment.mustache"
 # If you want to push the image to a custom docker registry
-pushImageHost: docker-registry.com
+pushImageHost: localhost:5000
 # The host that image should be pulled
 # If you want to pull the image from a docker registry
 # Recommended when the registry is running on the same host. If not set, pushImageHost will be used

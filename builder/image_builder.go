@@ -7,12 +7,12 @@ import (
 	"os/exec"
 )
 
-func DockerImageBuilder(values Values, err error) error {
+func DockerImageBuilder(values Values) error {
 	if values.DockerfilePath == "." {
 		values.DockerfilePath = "./Dockerfile"
 	}
 
-	err = dockerRun(values, err)
+	err := dockerRun(values)
 	if err != nil {
 		return err
 	}
@@ -25,6 +25,28 @@ func DockerImageBuilder(values Values, err error) error {
 	}
 
 	return nil
+}
+
+func EnvGenerate(values Values, directoryPath string) {
+	imageNameTag := values.ImageName + ":" + values.ImageTag
+	image := values.ImageName + ":" + values.ImageTag
+
+	if values.PullImageHost != "" {
+		image = values.PushImageHost + "/" + values.ImageName + ":" + values.ImageTag
+	}
+
+	template := "export %s=%s\n"
+	var result = fmt.Sprintf(template, "DOCKER_IMAGE_NAME", imageNameTag)
+	result += fmt.Sprintf(template, "DOCKER_IMAGE_FULL_NAME", image)
+	result += fmt.Sprintf(template, "DOCKER_CONTAINER_NAME", values.ContainerName)
+
+	err := os.WriteFile(directoryPath+".env", []byte(result), 0644)
+	if err != nil {
+		fmt.Println("Error writing to file:", err)
+		return
+	}
+	fmt.Printf("Declared env:\n%sTo load theses envs, run\n\tsource %s\n", result, directoryPath+".env")
+
 }
 
 func rumCommand(name string, arg ...string) error {
@@ -69,7 +91,7 @@ func dockerImageStorage(values Values) error {
 			return err
 		}
 	}
-
+	fmt.Printf("Declared env DOCKER_IMAGE_FULL_NAME=%s", image)
 	return err
 }
 
@@ -77,10 +99,12 @@ func showDoLogin(username string, password string) bool {
 	return username != "" && password != ""
 }
 
-func dockerRun(values Values, err error) error {
-	log.Printf("Building doker image %s started", values.ImageName+":"+values.ImageTag)
+func dockerRun(values Values) error {
+	imageNameTag := values.ImageName + ":" + values.ImageTag
 
-	args := []string{"build", "-t", values.ImageName + ":" + values.ImageTag, "-f", values.DockerfilePath}
+	log.Printf("Building doker image %s started", imageNameTag)
+
+	args := []string{"build", "-t", imageNameTag, "-f", values.DockerfilePath}
 
 	for argKey, argValue := range values.Args {
 		args = append(args, "--build-arg", fmt.Sprintf("%s=%s", argKey, argValue))
@@ -96,7 +120,8 @@ func dockerRun(values Values, err error) error {
 
 	cmdBuild.Stdout = os.Stdout
 	cmdBuild.Stderr = os.Stderr
-	err = cmdBuild.Run()
+	err := cmdBuild.Run()
+
 	if err != nil {
 		log.Fatalf("Docker build command failed: %s", err)
 	} else {
@@ -104,7 +129,6 @@ func dockerRun(values Values, err error) error {
 			err = storeDockerImageToFile(values)
 		}
 	}
-
 	return err
 }
 

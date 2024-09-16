@@ -25,7 +25,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_ = builder.DockerImageBuilder(values, err)
+	_ = builder.DockerImageBuilder(values)
+
+	builder.EnvGenerate(values, directoryPath)
 
 	fmt.Println(directoryPath+"docker-compose.yml", "generated successful")
 
